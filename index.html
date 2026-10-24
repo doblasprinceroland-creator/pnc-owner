@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PNC Owner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
@@ -55,11 +55,6 @@
       <div class="pill" id="hRouter"><span class="dot"></span><div><b>Router</b><small>—</small></div></div>
     </section>
 
-    <section id="casesCard" class="card hidden">
-      <div class="card-head"><h2>Coin reports</h2><span id="casesNote" class="muted small"></span></div>
-      <ul id="cases" class="cases"></ul>
-    </section>
-
     <section class="card today">
       <div class="card-head"><h2>Today</h2><span id="todayDate" class="muted"></span></div>
       <div id="todayAmt" class="big">—</div>
@@ -76,7 +71,6 @@
         <div id="boxSince" class="muted small"></div>
         <div class="meter"><span id="boxBar"></span></div>
         <div id="boxNext" class="muted small"></div>
-        <div id="boxCount" class="muted small box-count"></div>
         <button id="emptiedBtn" class="btn ghost" type="button">I emptied it</button>
       </section>
       <section class="card">
@@ -127,6 +121,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

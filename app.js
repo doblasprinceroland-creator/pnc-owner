@@ -203,24 +203,10 @@
 
     // Online + events
     $("online").textContent = String(d.online);
-    const rf = Array.isArray(d.rf) ? d.rf : [0, 0, 0];
     $("events").textContent = "Today: " + d.rst + " router restart" + (d.rst === 1 ? "" : "s") +
-      " · " + d.jfo + " JuanFi outage" + (d.jfo === 1 ? "" : "s") +
-      (rf[1] > 0 ? " · " + rf[1] + " coin refund" + (rf[1] === 1 ? "" : "s") + " (" + peso(rf[0]) + ", " + rf[2] + " min)" : "");
-    // Last coin-box count vs the router's record (pnc-sale "emptied <pesos>").
-    const bx = Array.isArray(d.bx) ? d.bx : null;
-    if (bx) {
-      const day = ymd(bx[0]);
-      const diff = bx[2] - bx[1];
-      $("boxCount").textContent = "Last count" + (day ? " " + MONTHS[day.getMonth()] + " " + day.getDate() : "") + ": " +
-        peso(bx[2]) + " vs " + peso(bx[1]) + " recorded (" + (diff >= 0 ? "+" : "−") + peso(Math.abs(diff)) + ")" +
-        (bx[3] > 0 ? ", refunds " + peso(bx[3]) : "");
-    } else {
-      $("boxCount").textContent = "";
-    }
+      " · " + d.jfo + " JuanFi outage" + (d.jfo === 1 ? "" : "s");
 
     renderChart(d, date);
-    renderCases(d);
 
     // Notice
     const nn = $("noticeNow");
@@ -269,98 +255,6 @@
     }
     $("chartNote").textContent = known < 14 ? "History started " + dayLabel(cols.find(c => c.known).day) + "; the chart fills in day by day." : "";
   }
-
-  // ---------- coin reports (pnc-disputes.rsc) ----------
-  const VERDICT = {
-    G: { label: "Likely real", cls: "g" },
-    Y: { label: "Can't tell", cls: "y" },
-    R: { label: "No missing coin found", cls: "r" }
-  };
-  const STATUS = { open: "Waiting for you", approved: "Approved", given: "Time given", declined: "Declined", auto: "Refunded automatically" };
-  let focusedCase = "";
-
-  function caseFromHash() {
-    const m = /case=(D\d+)/.exec(location.hash || "");
-    return m ? m[1] : "";
-  }
-
-  function renderCases(d) {
-    const rows = (Array.isArray(d.cases) ? d.cases : []).filter(Array.isArray).slice().reverse();
-    const card = $("casesCard");
-    const list = $("cases");
-    if (!rows.length) { card.classList.add("hidden"); return; }
-    card.classList.remove("hidden");
-    const open = rows.filter(r => r[3] === "open").length;
-    $("casesNote").textContent = open ? open + " waiting" : "all handled";
-    list.innerHTML = "";
-    const now = Date.now() / 1000;
-    const wanted = caseFromHash();
-    rows.forEach(r => {
-      const [id, at, verdict, status, claim, credited, minutes, summary] = r;
-      const v = VERDICT[verdict] || VERDICT.Y;
-      const li = document.createElement("li");
-      li.className = "case " + v.cls + (status === "open" ? " open" : "") + (id === wanted ? " focus" : "");
-      li.id = "case-" + id;
-      const head = document.createElement("div");
-      head.className = "case-head";
-      const title = document.createElement("b");
-      title.textContent = id + " · " + v.label;
-      const meta = document.createElement("span");
-      meta.className = "muted small";
-      meta.textContent = ago(now - at) + " · " + (STATUS[status] || status) +
-        ((status === "approved" || status === "given" || status === "auto") && minutes ? " +" + minutes + " min" : "");
-      if (status === "auto") title.textContent = id + " · Proven shortfall";
-      head.append(title, meta);
-      const body = document.createElement("p");
-      body.className = "case-body";
-      body.textContent = summary;
-      const nums = document.createElement("div");
-      nums.className = "case-nums small";
-      nums.textContent = "Claimed " + peso(claim) + " · credited " + peso(credited);
-      li.append(head, body, nums);
-      if (status === "open") {
-        const row = document.createElement("div");
-        row.className = "row wrap";
-        if (minutes > 0) {
-          const ok = document.createElement("button");
-          ok.className = "btn primary";
-          ok.type = "button";
-          ok.textContent = "Approve +" + minutes + " min";
-          ok.addEventListener("click", () => {
-            if (confirm("Give the customer " + minutes + " minutes for " + id + "?")) command("dispute " + id + " approve", "Approving " + id + "…");
-          });
-          row.appendChild(ok);
-        }
-        const give = document.createElement("button");
-        give.className = "btn ghost";
-        give.type = "button";
-        give.textContent = "Give…";
-        give.addEventListener("click", () => {
-          const ans = prompt("How many minutes to give for " + id + "?", minutes > 0 ? String(minutes) : "30");
-          const n = Math.round(Number(ans));
-          if (!ans) return;
-          if (!(n >= 1 && n <= 1440)) { toast("Enter 1 to 1440 minutes."); return; }
-          command("dispute " + id + " give " + n, "Giving " + n + " min for " + id + "…");
-        });
-        const no = document.createElement("button");
-        no.className = "btn ghost";
-        no.type = "button";
-        no.textContent = "Decline";
-        no.addEventListener("click", () => {
-          if (confirm("Decline " + id + "? The customer is told the missing coin could not be confirmed.")) command("dispute " + id + " decline", "Declining " + id + "…");
-        });
-        row.append(give, no);
-        li.appendChild(row);
-      }
-      list.appendChild(li);
-    });
-    if (wanted && wanted !== focusedCase && $("case-" + wanted)) {
-      focusedCase = wanted;
-      $("case-" + wanted).scrollIntoView({ block: "center", behavior: "smooth" });
-    }
-  }
-
-  window.addEventListener("hashchange", () => { focusedCase = ""; if (dash) render(); });
 
   // ---------- alerts ----------
   async function loadAlerts() {
@@ -446,11 +340,7 @@
 
     $("emptiedBtn").addEventListener("click", () => {
       const amt = dash ? peso(dash.box) : "the coin box";
-      const ans = prompt("You emptied the coin box. How much did you count? (The router recorded " + amt + ". Leave empty to skip the count.)", "");
-      if (ans === null) return;
-      const counted = String(ans).replace(/[^0-9]/g, "");
-      if (counted.length > 6) { toast("That number looks too big."); return; }
-      command(counted ? "emptied " + counted : "emptied", "Coin box reset. The comparison arrives in your ntfy app.");
+      if (confirm("Did you empty the coin box? This sets the count (" + amt + ") back to ₱0.")) command("emptied");
     });
 
     const input = $("noticeInput");

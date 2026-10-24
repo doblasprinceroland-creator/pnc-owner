@@ -231,26 +231,6 @@ body {
 .row.wrap { flex-wrap: wrap; }
 .row .muted.small { margin-right: auto; }
 
-/* Coin reports */
-.cases { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.case {
-  padding: 12px 12px 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .04);
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-left: 4px solid var(--dim);
-}
-.case.g { border-left-color: var(--ok); }
-.case.y { border-left-color: var(--warn); }
-.case.r { border-left-color: var(--dim); opacity: .8; }
-.case.open { background: rgba(124, 77, 255, .1); }
-.case.focus { box-shadow: 0 0 0 2px var(--lilac); }
-.case-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.case-head b { font-size: 14px; }
-.case-body { margin: 6px 0 4px; font-size: 13.5px; line-height: 1.45; color: var(--text); overflow-wrap: anywhere; }
-.case-nums { color: var(--muted); }
-.case .row { margin-top: 10px; }
-
 /* Alerts */
 .alerts { list-style: none; margin: 0; padding: 0; }
 .alerts li { padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, .07); font-size: 13.5px; line-height: 1.45; }
@@ -309,5 +289,3 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
-
-.box-count { margin: 4px 0 8px; }
