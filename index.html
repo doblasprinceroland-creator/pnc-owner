@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PNC Owner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
@@ -53,6 +53,11 @@
       <div class="pill" id="hNet"><span class="dot"></span><div><b>Internet</b><small>—</small></div></div>
       <div class="pill" id="hJf"><span class="dot"></span><div><b>JuanFi</b><small>—</small></div></div>
       <div class="pill" id="hRouter"><span class="dot"></span><div><b>Router</b><small>—</small></div></div>
+    </section>
+
+    <section id="casesCard" class="card hidden">
+      <div class="card-head"><h2>Coin reports</h2><span id="casesNote" class="muted small"></span></div>
+      <ul id="cases" class="cases"></ul>
     </section>
 
     <section class="card today">
@@ -121,6 +126,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
