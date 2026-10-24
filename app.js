@@ -158,7 +158,10 @@
     // Health
     if (stale) setPill("hNet", "warn", "unknown");
     else if (d.net === "down") setPill("hNet", "bad", "Down" + (d.netDown ? " since " + clock(d.netDown) : ""));
-    else setPill("hNet", "ok", "Up");
+    else {
+      const out = Array.isArray(d.out) ? d.out : [0, 0];
+      setPill("hNet", "ok", "Up" + (out[0] > 0 ? " · " + out[0] + " outage" + (out[0] === 1 ? "" : "s") + " today (" + Math.max(1, Math.round(out[1] / 60)) + " min)" : ""));
+    }
     if (stale) setPill("hJf", "warn", "unknown");
     else if (d.jf === "up") setPill("hJf", "ok", "Taking coins");
     else if (d.jf === "down") setPill("hJf", "bad", "Not responding");
@@ -176,6 +179,19 @@
     $("todayAmt").textContent = peso(d.amt);
     $("todaySub").textContent = d.n === 0 ? "No sales yet today" :
       d.n + (d.n === 1 ? " sale" : " sales") + " · " + d.new + " new · " + d.ext + " Add Time";
+    // Last sale and yesterday's total. A long quiet spell in opening hours can
+    // mean the coin slot needs a look, so it turns amber after 3 h (8 AM-9 PM).
+    const meta = [];
+    if (d.ls > 0) meta.push("Last sale " + ago(now - d.ls));
+    else meta.push("No sale recorded yet");
+    const yDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+    const yKey = yDay.getFullYear() + "-" + String(yDay.getMonth() + 1).padStart(2, "0") + "-" + String(yDay.getDate()).padStart(2, "0");
+    const yRow = (Array.isArray(d.hist) ? d.hist : []).find(r => Array.isArray(r) && r[0] === yKey);
+    if (yRow) meta.push("Yesterday " + peso(yRow[1]));
+    const hourNow = new Date().getHours();
+    const quiet = !stale && d.ls > 0 && now - d.ls > 3 * 3600 && hourNow >= 8 && hourNow < 21;
+    $("todayMeta").textContent = meta.join(" · ");
+    $("todayMeta").classList.toggle("warn", quiet);
     const hours = Array.isArray(d.h) ? d.h : [];
     const max = Math.max(1, ...hours);
     let peak = -1;
@@ -301,12 +317,33 @@
     pollTimer = setTimeout(poll, ms);
   }
 
+  // Fresh numbers on open: when what we have is older than 5 minutes, ask the
+  // router once (at most every 3 minutes), without a toast.
+  const AUTO_REFRESH_AGE_S = 300;
+  const AUTO_REFRESH_GAP_MS = 180000;
+  let lastAutoAsk = 0;
+  let quietRefresh = false;
+
+  function maybeAutoRefresh() {
+    if (document.hidden || Date.now() - lastAutoAsk < AUTO_REFRESH_GAP_MS) return;
+    const age = dash ? Date.now() / 1000 - dash.t : Infinity;
+    if (age < AUTO_REFRESH_AGE_S) return;
+    lastAutoAsk = Date.now();
+    quietRefresh = true;
+    send("refresh").then(() => {
+      fastUntil = Date.now() + FAST_FOR_MS;
+      schedule(FAST_POLL_MS);
+    }).catch(() => { quietRefresh = false; });
+  }
+
   async function poll() {
     if (document.hidden) return;
     const before = dash ? dash.t : 0;
+    let reached = false;
     try {
       const d = await fetchDash();
       if (d) dash = d;
+      reached = true;
       render();
     } catch (_) {
       $("updated").textContent = "Offline";
@@ -315,8 +352,10 @@
     if (dash && dash.t !== before && Date.now() < fastUntil && before) {
       fastUntil = 0;
       $("refreshBtn").classList.remove("spin");
-      toast("Updated.");
+      if (!quietRefresh) toast("Updated.");
+      quietRefresh = false;
     }
+    if (reached) maybeAutoRefresh();
     if (Date.now() >= fastUntil) $("refreshBtn").classList.remove("spin");
     if (Date.now() - lastAlertsAt >= ALERTS_MS) loadAlerts();
     schedule(Date.now() < fastUntil ? FAST_POLL_MS : POLL_MS);

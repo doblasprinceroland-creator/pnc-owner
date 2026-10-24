@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PNC Owner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
@@ -59,6 +59,7 @@
       <div class="card-head"><h2>Today</h2><span id="todayDate" class="muted"></span></div>
       <div id="todayAmt" class="big">—</div>
       <div id="todaySub" class="sub">—</div>
+      <div id="todayMeta" class="today-meta small"></div>
       <div id="hours" class="hours" aria-label="Pesos per hour"></div>
       <div class="hours-axis"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>12a</span></div>
       <div id="busiest" class="muted small"></div>
@@ -121,6 +122,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

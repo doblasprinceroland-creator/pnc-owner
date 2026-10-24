@@ -1,11 +1,11 @@
 // PNC Owner: caches the page itself so the home-screen app opens instantly.
 // Data (ntfy.sh) is never cached: every number comes fresh from the network.
-const CACHE = "pnc-owner-v5";
+const CACHE = "pnc-owner-v6";
 const SHELL = [
   "./",
   "index.html",
-  "style.css?v=5",
-  "app.js?v=5",
+  "style.css?v=6",
+  "app.js?v=6",
   "manifest.webmanifest",
   "icons/pnc-logo.webp",
   "icons/pnc-logo.png",
