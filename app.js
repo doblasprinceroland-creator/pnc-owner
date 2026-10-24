@@ -203,8 +203,21 @@
 
     // Online + events
     $("online").textContent = String(d.online);
+    const rf = Array.isArray(d.rf) ? d.rf : [0, 0, 0];
     $("events").textContent = "Today: " + d.rst + " router restart" + (d.rst === 1 ? "" : "s") +
-      " · " + d.jfo + " JuanFi outage" + (d.jfo === 1 ? "" : "s");
+      " · " + d.jfo + " JuanFi outage" + (d.jfo === 1 ? "" : "s") +
+      (rf[1] > 0 ? " · " + rf[1] + " coin refund" + (rf[1] === 1 ? "" : "s") + " (" + peso(rf[0]) + ", " + rf[2] + " min)" : "");
+    // Last coin-box count vs the router's record (pnc-sale "emptied <pesos>").
+    const bx = Array.isArray(d.bx) ? d.bx : null;
+    if (bx) {
+      const day = ymd(bx[0]);
+      const diff = bx[2] - bx[1];
+      $("boxCount").textContent = "Last count" + (day ? " " + MONTHS[day.getMonth()] + " " + day.getDate() : "") + ": " +
+        peso(bx[2]) + " vs " + peso(bx[1]) + " recorded (" + (diff >= 0 ? "+" : "−") + peso(Math.abs(diff)) + ")" +
+        (bx[3] > 0 ? ", refunds " + peso(bx[3]) : "");
+    } else {
+      $("boxCount").textContent = "";
+    }
 
     renderChart(d, date);
     renderCases(d);
@@ -263,7 +276,7 @@
     Y: { label: "Can't tell", cls: "y" },
     R: { label: "No missing coin found", cls: "r" }
   };
-  const STATUS = { open: "Waiting for you", approved: "Approved", given: "Time given", declined: "Declined" };
+  const STATUS = { open: "Waiting for you", approved: "Approved", given: "Time given", declined: "Declined", auto: "Refunded automatically" };
   let focusedCase = "";
 
   function caseFromHash() {
@@ -295,7 +308,8 @@
       const meta = document.createElement("span");
       meta.className = "muted small";
       meta.textContent = ago(now - at) + " · " + (STATUS[status] || status) +
-        ((status === "approved" || status === "given") && minutes ? " +" + minutes + " min" : "");
+        ((status === "approved" || status === "given" || status === "auto") && minutes ? " +" + minutes + " min" : "");
+      if (status === "auto") title.textContent = id + " · Proven shortfall";
       head.append(title, meta);
       const body = document.createElement("p");
       body.className = "case-body";
@@ -432,7 +446,11 @@
 
     $("emptiedBtn").addEventListener("click", () => {
       const amt = dash ? peso(dash.box) : "the coin box";
-      if (confirm("Did you empty the coin box? This sets the count (" + amt + ") back to ₱0.")) command("emptied");
+      const ans = prompt("You emptied the coin box. How much did you count? (The router recorded " + amt + ". Leave empty to skip the count.)", "");
+      if (ans === null) return;
+      const counted = String(ans).replace(/[^0-9]/g, "");
+      if (counted.length > 6) { toast("That number looks too big."); return; }
+      command(counted ? "emptied " + counted : "emptied", "Coin box reset. The comparison arrives in your ntfy app.");
     });
 
     const input = $("noticeInput");

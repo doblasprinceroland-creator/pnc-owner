@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PNC Owner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
@@ -76,6 +76,7 @@
         <div id="boxSince" class="muted small"></div>
         <div class="meter"><span id="boxBar"></span></div>
         <div id="boxNext" class="muted small"></div>
+        <div id="boxCount" class="muted small box-count"></div>
         <button id="emptiedBtn" class="btn ghost" type="button">I emptied it</button>
       </section>
       <section class="card">
@@ -126,6 +127,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
