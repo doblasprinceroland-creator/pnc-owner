@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0d0a22">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex,nofollow">
+  <title>PNC Owner</title>
+  <link rel="icon" type="image/png" href="icons/pnc-icon-64.png">
+  <link rel="apple-touch-icon" href="icons/pnc-icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PNC Owner">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+  <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
+  <main id="setup" class="setup hidden">
+    <picture>
+      <source srcset="icons/pnc-logo.webp" type="image/webp">
+      <img class="setup-logo" src="icons/pnc-logo.png" alt="PNC WiFi" width="200" height="100">
+    </picture>
+    <h1>Owner dashboard</h1>
+    <p class="muted">Enter your PNC alert topic: the same name your ntfy app is subscribed to. It is saved on this phone only.</p>
+    <form id="setupForm" autocomplete="off">
+      <input id="topicInput" type="password" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ntfy topic name" required>
+      <label class="show-topic"><input id="showTopic" type="checkbox"> Show</label>
+      <button class="btn primary" type="submit">Connect</button>
+      <p id="setupMsg" class="setup-msg" role="status"></p>
+    </form>
+  </main>
+
+  <div id="app" class="app hidden">
+    <header class="top">
+      <picture>
+        <source srcset="icons/pnc-logo.webp" type="image/webp">
+        <img class="logo" src="icons/pnc-logo.png" alt="PNC WiFi" width="120" height="60">
+      </picture>
+      <div class="top-right">
+        <div id="updated" class="updated">Loading…</div>
+        <button id="refreshBtn" class="icon-btn" type="button" aria-label="Ask the router for fresh numbers">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner hidden" role="alert"></div>
+
+    <section class="health" aria-label="System health">
+      <div class="pill" id="hNet"><span class="dot"></span><div><b>Internet</b><small>—</small></div></div>
+      <div class="pill" id="hJf"><span class="dot"></span><div><b>JuanFi</b><small>—</small></div></div>
+      <div class="pill" id="hRouter"><span class="dot"></span><div><b>Router</b><small>—</small></div></div>
+    </section>
+
+    <section class="card today">
+      <div class="card-head"><h2>Today</h2><span id="todayDate" class="muted"></span></div>
+      <div id="todayAmt" class="big">—</div>
+      <div id="todaySub" class="sub">—</div>
+      <div id="hours" class="hours" aria-label="Pesos per hour"></div>
+      <div class="hours-axis"><span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>12a</span></div>
+      <div id="busiest" class="muted small"></div>
+    </section>
+
+    <div class="grid2">
+      <section class="card">
+        <div class="card-head"><h2>Coin box</h2></div>
+        <div id="boxAmt" class="mid">—</div>
+        <div id="boxSince" class="muted small"></div>
+        <div class="meter"><span id="boxBar"></span></div>
+        <div id="boxNext" class="muted small"></div>
+        <button id="emptiedBtn" class="btn ghost" type="button">I emptied it</button>
+      </section>
+      <section class="card">
+        <div class="card-head"><h2>Online now</h2></div>
+        <div id="online" class="mid">—</div>
+        <div class="muted small">customers connected</div>
+        <div id="events" class="events muted small"></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-head"><h2>Last 14 days</h2><span id="weekCmp" class="muted small"></span></div>
+      <div id="chart" class="chart" aria-label="Pesos per day"></div>
+      <div id="chartNote" class="muted small"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Portal notice</h2></div>
+      <div id="noticeNow" class="notice-now muted">—</div>
+      <form id="noticeForm" class="notice-form" autocomplete="off">
+        <textarea id="noticeInput" maxlength="160" rows="2" placeholder="Message customers see on the portal"></textarea>
+        <div class="row">
+          <span id="noticeCount" class="muted small">0/160</span>
+          <button id="noticeOff" class="btn ghost" type="button">Remove</button>
+          <button class="btn primary" type="submit">Show on portal</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Recent alerts</h2><span class="muted small">last 12 h</span></div>
+      <ul id="alerts" class="alerts"><li class="muted">Loading…</li></ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Reports</h2></div>
+      <p class="muted small">Sent to your ntfy app as a notification.</p>
+      <div class="row wrap">
+        <button class="btn ghost" type="button" data-cmd="sales">Today so far</button>
+        <button class="btn ghost" type="button" data-cmd="weekly">This week</button>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <button id="forgetBtn" class="link" type="button">Disconnect this phone</button>
+      <span class="muted small">PNC WiFi · Owner</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=1"></script>
+</body>
+</html>
