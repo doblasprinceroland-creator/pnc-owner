@@ -202,6 +202,12 @@ body::before {
 .big { font-size: 46px; }
 .mid { font-size: 32px; }
 .sub { margin-top: 4px; font-size: 13.5px; color: var(--muted); }
+.month-cmp { margin-top: 6px; }
+.month-cmp.up { color: var(--ok); }
+.month-cmp.down { color: var(--warn); }
+.months { margin-top: 10px; display: grid; gap: 6px; }
+.month-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.month-row span:last-child { color: var(--muted); }
 
 /* Hourly strip */
 .hours { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; align-items: end; height: 52px; margin-top: 14px; }

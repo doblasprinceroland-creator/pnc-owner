@@ -223,6 +223,7 @@
       " · " + d.jfo + " JuanFi outage" + (d.jfo === 1 ? "" : "s");
 
     renderChart(d, date);
+    renderMonth(d, date);
 
     // Notice
     const nn = $("noticeNow");
@@ -270,6 +271,57 @@
       $("weekCmp").textContent = "7 days " + peso(week);
     }
     $("chartNote").textContent = known < 14 ? "History started " + dayLabel(cols.find(c => c.known).day) + "; the chart fills in day by day." : "";
+  }
+
+  // Monthly view (2026-10-25). d.mon holds closed days per month
+  // [YYYY-MM, pesos, sales, days, best day, best pesos]; today is d.amt. d.mprev
+  // is last month's pesos up to today's day of the month (-1: no data yet).
+  function renderMonth(d, date) {
+    const pad = n => String(n).padStart(2, "0");
+    const ym = date.getFullYear() + "-" + pad(date.getMonth() + 1);
+    const rows = (Array.isArray(d.mon) ? d.mon : []).filter(r => Array.isArray(r) && r.length >= 6);
+    const cur = rows.find(r => r[0] === ym);
+    const today = Number(d.amt) || 0;
+    const amt = (cur ? Number(cur[1]) || 0 : 0) + today;
+    const sales = (cur ? Number(cur[2]) || 0 : 0) + (Number(d.n) || 0);
+    const days = (cur ? Number(cur[3]) || 0 : 0) + 1;
+    let best = cur && Number(cur[5]) > 0 && ymd(cur[4]) ? { label: ymd(cur[4]), value: Number(cur[5]) } : null;
+    if (today > 0 && (!best || today > best.value)) best = { label: "today", value: today };
+
+    const firstDay = date.getDate() - days + 1;
+    $("monthName").textContent = MONTHS[date.getMonth()] + " " + date.getFullYear() +
+      (firstDay > 1 ? " · counted since " + MONTHS[date.getMonth()] + " " + firstDay : "");
+    $("monthAmt").textContent = peso(amt);
+    const sub = [sales + (sales === 1 ? " sale" : " sales"), peso(amt / days) + "/day average"];
+    if (best) sub.push("best " + (best.label === "today" ? "today" : MONTHS[best.label.getMonth()] + " " + best.label.getDate()) + " " + peso(best.value));
+    $("monthSub").textContent = sub.join(" · ");
+
+    const cmp = $("monthCmp");
+    const prev = Number(d.mprev);
+    if (Number.isFinite(prev) && prev >= 0) {
+      const diff = amt - prev;
+      cmp.textContent = (diff >= 0 ? "+" : "−") + peso(Math.abs(diff)) + " vs the same days last month (" + peso(prev) + ")";
+      cmp.className = "month-cmp small " + (diff >= 0 ? "up" : "down");
+    } else {
+      cmp.textContent = "The comparison with last month starts once there is a full month of data.";
+      cmp.className = "month-cmp small muted";
+    }
+
+    const list = $("months");
+    list.innerHTML = "";
+    rows.filter(r => r[0] !== ym).slice(-6).reverse().forEach(r => {
+      const m = /^(\d{4})-(\d{2})$/.exec(String(r[0]));
+      if (!m) return;
+      const row = document.createElement("div");
+      row.className = "month-row";
+      const name = document.createElement("span");
+      name.textContent = MONTHS[Number(m[2]) - 1] + " " + m[1];
+      const value = document.createElement("span");
+      const n = Number(r[3]) || 0;
+      value.textContent = peso(r[1]) + (n > 0 ? " · " + peso((Number(r[1]) || 0) / n) + "/day" : "");
+      row.append(name, value);
+      list.appendChild(row);
+    });
   }
 
   // ---------- alerts ----------

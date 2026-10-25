@@ -14,7 +14,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PNC Owner">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <!-- Setup: the ntfy topic stays on this phone (localStorage) and is never put in a URL. -->
@@ -89,6 +89,14 @@
     </section>
 
     <section class="card">
+      <div class="card-head"><h2>This month</h2><span id="monthName" class="muted small"></span></div>
+      <div id="monthAmt" class="mid">—</div>
+      <div id="monthSub" class="sub">—</div>
+      <div id="monthCmp" class="month-cmp small"></div>
+      <div id="months" class="months"></div>
+    </section>
+
+    <section class="card">
       <div class="card-head"><h2>Portal notice</h2></div>
       <div id="noticeNow" class="notice-now muted">—</div>
       <form id="noticeForm" class="notice-form" autocomplete="off">
@@ -122,6 +130,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
